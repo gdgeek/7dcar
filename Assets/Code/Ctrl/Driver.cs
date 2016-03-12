@@ -12,21 +12,54 @@ public class Driver : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
        fsm_.addState("normal", getNormalState());
-        fsm_.addState("turn", getTurnState());
+        fsm_.addState("left", getLeftState());
+        fsm_.addState("right", getRightState());
         fsm_.init("normal");
 
     }
     private State getNormalState()
     {
         StateWithEventMap state = new StateWithEventMap();
-       // state.addAction("left", )
+        state.addAction("left", delegate
+        {
+
+            if (_car.transform.localPosition.x > -18) {
+                return "left";
+            }
+            return "";
+        });
+        state.addAction("right", delegate {
+
+            if (_car.transform.localPosition.x < 18)
+            {
+                return "right";
+            }
+            return "";
+        });
         return state;
     }
 
-
-    private State getTurnState()
+    private State getRightState() {
+        StateWithEventMap state = TaskState.Create(delegate
+        {
+            Task task = new TweenTask(delegate
+            {
+                return TweenLocalPosition.Begin(this._car.gameObject, 0.3f, new Vector3(_car.transform.localPosition.x + 18, _car.transform.localPosition.y, _car.transform.localPosition.z + 300 * 0.3f));
+            });
+            return task;
+        }, this.fsm_, "normal");
+        return state;
+    }
+    private State getLeftState()
     {
-        State state = new State();
+        StateWithEventMap state = TaskState.Create(delegate
+        {
+            Task task = new TweenTask(delegate
+            {
+                return TweenLocalPosition.Begin(this._car.gameObject, 0.3f, new Vector3(_car.transform.localPosition.x-18, _car.transform.localPosition.y, _car.transform.localPosition.z +300*0.3f));
+            });
+            return task;
+        }, this.fsm_, "normal");
         return state;
     }
     // Update is called once per frame
@@ -84,15 +117,18 @@ public class Driver : MonoBehaviour {
         }
 
         Vector3 vp = _camera.ScreenToViewportPoint(new Vector3(gesture.position.x, gesture.position.y, 0.0f));
-        Debug.LogWarning("!!"+ vp);
+
         if (vp.x < 0.4f) {
-            _car.transform.localPosition = new Vector3(_car.transform.localPosition.x-18, _car.transform.localPosition.y, _car.transform.localPosition.z);
+          //  _car.transform.localPosition = new Vector3(_car.transform.localPosition.x-18, _car.transform.localPosition.y, _car.transform.localPosition.z);
             Debug.Log("left");
+            this.fsm_.post("left");
         } else if(vp.x > 0.6f)
         {
-            _car.transform.localPosition = new Vector3(_car.transform.localPosition.x +18, _car.transform.localPosition.y, _car.transform.localPosition.z);
+         //   _car.transform.localPosition = new Vector3(_car.transform.localPosition.x +18, _car.transform.localPosition.y, _car.transform.localPosition.z);
             Debug.Log("right");
+            this.fsm_.post("right");
         }
+        /*
         if (_car.transform.localPosition.x < -18) {
             _car.transform.localPosition = new Vector3(- 18, _car.transform.localPosition.y, _car.transform.localPosition.z);
 
@@ -100,6 +136,6 @@ public class Driver : MonoBehaviour {
         {
             _car.transform.localPosition = new Vector3(18, _car.transform.localPosition.y, _car.transform.localPosition.z);
 
-        }
+        }*/
     }
 }
