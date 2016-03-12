@@ -22,7 +22,7 @@ public class Driver : MonoBehaviour {
         StateWithEventMap state = new StateWithEventMap();
         state.addAction("left", delegate
         {
-
+				Debug.Log(_car.transform.localPosition.x);
             if (_car.transform.localPosition.x > -18) {
                 return "left";
             }
@@ -56,6 +56,7 @@ public class Driver : MonoBehaviour {
         {
             Task task = new TweenTask(delegate
             {
+				Debug.Log("!!!!!!!!!!!!!!!!");
                 return TweenLocalPosition.Begin(this._car.gameObject, 0.3f, new Vector3(_car.transform.localPosition.x-18, _car.transform.localPosition.y, _car.transform.localPosition.z +300*0.3f));
             });
             return task;
